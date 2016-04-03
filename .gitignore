@@ -2,7 +2,7 @@
 /logs/
 /project/*-shim.sbt
 /project/project/
-/project/target/
+I
 /target/
 
 .cache-main
@@ -18,3 +18,6 @@
 *.prefs
 
 *.class
+/bin/
+
+*.cache
