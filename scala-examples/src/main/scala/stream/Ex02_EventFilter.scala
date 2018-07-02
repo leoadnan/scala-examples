@@ -94,7 +94,7 @@ object Ex02_EventFilter extends App with EventMarshalling {
   val runnableGraph: RunnableGraph[Future[IOResult]] = source.via(composedFlow).toMat(sink)(Keep.right)
 
   runnableGraph.run().foreach { result =>
-    println(s"Wrote ${result.count} bytes to 'outputFilePath'.")
+    println(s"Wrote ${result.count} bytes to '$outputFilePath'.")
     system.terminate()
   }
 
@@ -119,3 +119,13 @@ case class Event(
 
 case class LogReceipt(logId: String, written: Long)
 case class ParseError(logId: String, msg: String)    
+
+case class Metric(
+  service: String, 
+  time: ZonedDateTime, 
+  metric: Double, 
+  tag: String, 
+  drift: Int = 0
+)
+
+case class Summary(events: Vector[Event])
