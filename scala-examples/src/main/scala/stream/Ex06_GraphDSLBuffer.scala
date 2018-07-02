@@ -31,7 +31,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.Keep
 
-object Ex06_GraphDSLBuffer extends App{
+object Ex06_GraphDSLBuffer extends App {
   val config = ConfigFactory.load()
 
   val logsDir = {
@@ -97,11 +97,16 @@ object Ex06_GraphDSLBuffer extends App{
       val rollupErr = rollup(nrErrors, errDuration)
       val rollupWarn = rollup(nrWarnings, warnDuration)
 
+      //Buffer overflow in the archive flow fails the flow
       val archBuf = Flow[Event].buffer(archBufSize, OverflowStrategy.fail)
+      //Oldest warnings are dropped when the buffer is about to overflow
       val warnBuf = Flow[Event].buffer(warnBufSize, OverflowStrategy.dropHead)
+      //errors buffer will back-pressure when it’s full
       val errBuf = Flow[Event].buffer(errBufSize, OverflowStrategy.backpressure)
+      //Oldest metrics are dropped when the buffer is full
       val metricBuf = Flow[Event].buffer(errBufSize, OverflowStrategy.dropHead)
 
+      //Unfiltered events are buffered and connected to outgoing archival service flow
       bcast ~> archBuf ~> archive.in
       bcast ~> ok ~> okcast
       bcast ~> warning ~> wbcast
@@ -111,16 +116,20 @@ object Ex06_GraphDSLBuffer extends App{
       okcast ~> jsFlow ~> logFileSink("1", "ok")
       okcast ~> metricBuf ~>
         toMetric ~> recordDrift ~> metricOutFlow ~> metricsSink
+      //Metrics flow
 
       cbcast ~> jsFlow ~> logFileSink("4", "critical")
       cbcast ~> toNot ~> mergeNotify.preferred
+      //Critical errors are preferred in the merge, if more than one input has data.
 
       ebcast ~> jsFlow ~> logFileSink("3", "error")
       ebcast ~> errBuf ~> rollupErr ~> mergeNotify.in(0)
-
+      //Errors flow
+      
       wbcast ~> jsFlow ~> logFileSink("2", "warning")
       wbcast ~> warnBuf ~> rollupWarn ~> mergeNotify.in(1)
-
+      //Warnings flow
+      
       mergeNotify ~> notifyOutFlow ~> notificationSink
 
       FlowShape(bcast.in, archive.out)
