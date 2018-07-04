@@ -37,7 +37,7 @@ object Ex01_StreamingCopy extends App {
   //It’s also important to note that creating the RunnableGraph doesn’t start anything. 
   //It simply defines a blueprint for how to copy.
 
-  implicit val system = ActorSystem()
+  implicit val system: ActorSystem = ActorSystem()
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer() //The materializer eventually creates actors that execute the graph.
 
