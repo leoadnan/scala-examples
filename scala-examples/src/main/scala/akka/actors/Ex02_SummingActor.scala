@@ -22,13 +22,7 @@ object Ex02_SummingActor extends App {
   }
 
   val actorSystem: ActorSystem = ActorSystem("actorSystem")
-  import actorSystem.dispatcher
-//  actorSystem.scheduler.schedule(0 second, 1 seconds){
-//    println(new Date())
-//  }
   val actor = actorSystem.actorOf(Props(classOf[SummingActor]), name = "summing-actor")
-
   actor ! 5
-  actorSystem.scheduler.schedule(0 second, 1 second, actor, 1)
-//  actorSystem.terminate()
+  actorSystem.terminate()
 }
