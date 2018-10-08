@@ -13,7 +13,7 @@ object Ex09_DeathWatchApp extends App {
       case Service => println("I provide a special service")
     }
   }
-  
+
   class DeathWatchActor extends Actor {
     val child = context.actorOf(Props[ServiceActor], "serviceActor")
     context.watch(child)

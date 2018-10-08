@@ -23,6 +23,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import spray.json._
+import akka.utils._
 
 object LogJson extends EventMarshalling
   with NotificationMarshalling

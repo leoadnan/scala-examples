@@ -1,30 +1,32 @@
 package stream
 
-import java.nio.file.Paths
+import java.nio.file.FileSystems
+import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+import java.nio.file.Paths
 import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.StandardOpenOption.WRITE
 
+import scala.concurrent.Future
+
+import com.typesafe.config.ConfigFactory
+
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.FlowShape
+import akka.stream.Graph
+import akka.stream.IOResult
+import akka.stream.scaladsl.Broadcast
 import akka.stream.scaladsl.FileIO
+import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.Framing
+import akka.stream.scaladsl.GraphDSL
+import akka.stream.scaladsl.Keep
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import scala.concurrent.Future
-import akka.stream.IOResult
-import akka.stream.Graph
-import akka.NotUsed
-import akka.stream.FlowShape
-import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.GraphDSL
-import akka.stream.scaladsl.Broadcast
-import java.nio.file.Files
-import java.nio.file.FileSystems
-import com.typesafe.config.ConfigFactory
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializerSettings
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Framing
-import akka.stream.scaladsl.Keep
+import akka.utils._
 
 object Ex04_GraphDSL extends App with EventMarshalling {
   val config = ConfigFactory.load()

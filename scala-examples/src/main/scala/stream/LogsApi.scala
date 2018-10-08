@@ -24,6 +24,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import spray.json._
 import akka.NotUsed
+import akka.utils._
 
 class LogsApi(val logsDir: Path, val maxLine: Int)(implicit val executionContext: ExecutionContext, val materializer: ActorMaterializer) extends EventMarshalling {
 

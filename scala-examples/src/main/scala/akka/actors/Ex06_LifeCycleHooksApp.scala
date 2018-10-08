@@ -15,25 +15,26 @@ object Ex06_LifeCycleHooksApp extends App {
   class LifeCycleActor extends Actor {
     var sum = 1
 
-    override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
-      println(s"sum in preRestart is $sum")
-    }
+    override def preStart(): Unit = println(s"1. Pre_Start Called: sum in preStart is $sum")
 
-    override def preStart(): Unit = println(s"sum in preStart is $sum")
+    override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
+      println(s"2. Pre_Restart Called: sum in preRestart is $sum")
+    }
 
     override def receive = {
       case Error => throw new ArithmeticException("abc")
       case _ => println("default msg")
     }
 
-    override def postStop(): Unit = {
-      println(s"sum in postStop is ${sum * 3}")
-    }
-
     override def postRestart(reason: Throwable): Unit = {
       sum = sum * 2
-      println(s"sum in postRestart is $sum")
+      println(s"3. Post_Restart Called: sum in postRestart is $sum")
     }
+
+    override def postStop(): Unit = {
+      println(s"4. Post_Stop Called: sum in postStop is ${sum * 3}")
+    }
+
   }
 
   class Supervisor extends Actor {
@@ -58,5 +59,5 @@ object Ex06_LifeCycleHooksApp extends App {
   val child = Await.result(childFuture.mapTo[ActorRef], 2 seconds)
   child ! Error
   Thread.sleep(1000)
-  supervisor ! StopActor (child)
+  supervisor ! StopActor(child)
 }

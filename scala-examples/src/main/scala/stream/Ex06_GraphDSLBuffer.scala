@@ -30,6 +30,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.Keep
+import akka.utils._
 
 object Ex06_GraphDSLBuffer extends App {
   val config = ConfigFactory.load()

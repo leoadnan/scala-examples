@@ -25,6 +25,7 @@ import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.StandardOpenOption.CREATE
 import java.nio.file.StandardOpenOption.WRITE
 import akka.stream.scaladsl.Source
+import akka.utils.EventMarshalling
 
 object Ex05_GraphDSLMerge extends App with EventMarshalling {
 

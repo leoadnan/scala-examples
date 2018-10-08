@@ -50,7 +50,5 @@ object Ex01_HelloWorld extends App {
     case x => println(x)
   }
   
-  
   actorSystem.terminate
-
 }

@@ -1,34 +1,33 @@
 package stream
 
-import java.time.ZonedDateTime
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+import java.nio.file.StandardOpenOption.WRITE
+
+import scala.concurrent.Future
+
+import com.typesafe.config.ConfigFactory
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-
+import akka.stream.ActorAttributes
+import akka.stream.ActorMaterializer
+import akka.stream.ActorMaterializerSettings
+import akka.stream.IOResult
+import akka.stream.Supervision
+import akka.stream.scaladsl.FileIO
 import akka.stream.scaladsl.Flow
 import akka.stream.scaladsl.Framing
-import akka.stream.scaladsl.Sink
-import akka.stream.scaladsl.FileIO
-import akka.stream.scaladsl.Source
-import akka.stream.ActorMaterializer
-import akka.stream.IOResult
-
-import akka.util.ByteString
-import com.typesafe.config.ConfigFactory
-
-import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
-import java.nio.file.StandardOpenOption.CREATE
-import java.nio.file.StandardOpenOption.WRITE
-import java.nio.file.Paths
-import java.nio.file.Path
-
-import spray.json._
-import scala.concurrent.Future
-import akka.stream.scaladsl.RunnableGraph
 import akka.stream.scaladsl.Keep
-import akka.stream.Supervision
-import akka.stream.ActorAttributes
-import akka.stream.ActorMaterializerSettings
+import akka.stream.scaladsl.RunnableGraph
+import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+import spray.json.enrichAny
+
+import akka.utils._
 
 object Ex02_EventFilter extends App with EventMarshalling {
   val config = ConfigFactory.load()
@@ -107,25 +106,3 @@ object Ex02_EventFilter extends App with EventMarshalling {
       .map(event => ByteString(event.toJson.compactPrint))
 
 }
-
-case class Event(
-  host: String,
-  service: String,
-  state: String,
-  time: ZonedDateTime,
-  description: String,
-  tag: Option[String] = None,
-  metric: Option[Double] = None)
-
-case class LogReceipt(logId: String, written: Long)
-case class ParseError(logId: String, msg: String)    
-
-case class Metric(
-  service: String, 
-  time: ZonedDateTime, 
-  metric: Double, 
-  tag: String, 
-  drift: Int = 0
-)
-
-case class Summary(events: Vector[Event])

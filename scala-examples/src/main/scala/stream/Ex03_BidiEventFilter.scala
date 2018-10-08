@@ -18,6 +18,7 @@ import akka.util.ByteString
 import spray.json._
 
 import com.typesafe.config.{ Config, ConfigFactory }
+import akka.utils._
 
 object Ex03_BidiEventFilter extends App with EventMarshalling {
   val config = ConfigFactory.load()

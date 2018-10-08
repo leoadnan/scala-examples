@@ -11,6 +11,7 @@ import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.Http
 import scala.concurrent.Future
 import akka.event.Logging
+import akka.utils.LogStreamProcessor
 
 object LogsApp extends App {
   val config = ConfigFactory.load()

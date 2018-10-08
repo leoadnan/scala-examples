@@ -31,8 +31,8 @@ object Ex08_OneForOneStrategyApp extends App {
   class SupervisorStrategy extends Actor {
     import scala.concurrent.duration._
     override val supervisorStrategy = OneForOneStrategy(
-        maxNrOfRetries = 10,
-        withinTimeRange = 1 minute) {
+      maxNrOfRetries = 10,
+      withinTimeRange = 1 minute) {
       case _: ArithmeticException => Restart
       case _: NullPointerException => Restart
       case _: IllegalArgumentException => Stop
@@ -41,14 +41,15 @@ object Ex08_OneForOneStrategyApp extends App {
     val printer = context.actorOf(Props[Printer])
     val intAdder = context.actorOf(Props[IntAdder])
     def receive = {
-      case "Start" => printer ! "Hello printer"
-      printer ! 10
-      intAdder ! 10
-      intAdder ! 10
-      intAdder ! "Hello int adder"
+      case "Start" =>
+        printer ! "Hello printer"
+        printer ! 10
+        intAdder ! 10
+        intAdder ! 10
+        intAdder ! "Hello int adder"
     }
   }
-  
+
   val actorSystem = ActorSystem("Supervision")
   actorSystem.actorOf(Props[SupervisorStrategy]) ! "Start"
 }
