@@ -3,9 +3,11 @@ package stream
 import java.nio.file.Paths
 
 import akka.actor.ActorSystem
-
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl._
+import akka.stream.scaladsl.Compression
+import akka.stream.scaladsl.FileIO
+import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.Sink
 import akka.util.ByteString
 
 object Ex02_TransformingStreamsApp extends App {

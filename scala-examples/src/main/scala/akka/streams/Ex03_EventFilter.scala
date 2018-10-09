@@ -9,15 +9,20 @@ import scala.concurrent.Future
 
 import com.typesafe.config.ConfigFactory
 
+import akka.NotUsed
 import akka.stream.IOResult
 import akka.stream.scaladsl.FileIO
+import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.Sink
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import akka.stream.scaladsl.Flow
-import akka.NotUsed
-import akka.stream.scaladsl.Framing
 import akka.utils._
+import spray.json._
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Keep
+import akka.stream.scaladsl.RunnableGraph
 
 object Ex03_EventFilter extends App with EventMarshalling {
   val config = ConfigFactory.load()
@@ -34,4 +39,21 @@ object Ex03_EventFilter extends App with EventMarshalling {
   val parse: Flow[String, Event, NotUsed] = Flow[String]
     .map(LogStreamProcessor.parseLineEx)
     .collect { case Some(e) => e }
+  val filter: Flow[Event, Event, NotUsed] = Flow[Event]
+    .filter(_.state == "error")
+  val serialize: Flow[Event, ByteString, NotUsed] = Flow[Event]
+    .map(event => ByteString(event.toJson.compactPrint + System.lineSeparator()))
+
+  val composedFlow: Flow[ByteString, ByteString, NotUsed] = frame.via(parse).via(filter).via(serialize)
+
+  implicit val system = ActorSystem()
+  implicit val ec = system.dispatcher
+  implicit val materializer = ActorMaterializer()
+
+  val runnableGraph: RunnableGraph[Future[IOResult]] = source.via(composedFlow).toMat(sink)(Keep.right)
+
+  runnableGraph.run().foreach { result =>
+    println(s"Wrote ${result.count} bytes to 'outputFilePath'.")
+    system.terminate()
+  }
 }
