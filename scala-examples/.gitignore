@@ -9,3 +9,5 @@ bin/
 .worksheet/
 .idea/
 *.iml
+/logfile.json
+/.DS_Store

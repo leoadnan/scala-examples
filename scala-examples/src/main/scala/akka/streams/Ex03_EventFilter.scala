@@ -23,6 +23,9 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Keep
 import akka.stream.scaladsl.RunnableGraph
+import akka.stream.Supervision
+import akka.stream.ActorAttributes
+import akka.stream.ActorMaterializerSettings
 
 object Ex03_EventFilter extends App with EventMarshalling {
   val config = ConfigFactory.load()
@@ -30,6 +33,16 @@ object Ex03_EventFilter extends App with EventMarshalling {
 
   val inputFilePath = Paths.get("/Users/adnan/Personal-GitHub/scala-examples/scala-examples/logfile.log")
   val outputFilePath = Paths.get("/Users/adnan/Personal-GitHub/scala-examples/scala-examples/logfile.json")
+
+  import LogStreamProcessor._
+  val decider: Supervision.Decider = {
+    case _: LogParseException => Supervision.Resume
+    case _ => Supervision.Stop
+  }
+  val graphDecider: Supervision.Decider = {
+    case _: LogParseException => Supervision.Resume
+    case _ => Supervision.Stop
+  }
 
   val source: Source[ByteString, Future[IOResult]] = FileIO.fromPath(inputFilePath)
   val sink: Sink[ByteString, Future[IOResult]] = FileIO.toPath(outputFilePath, Set(CREATE, WRITE, TRUNCATE_EXISTING))
@@ -39,6 +52,7 @@ object Ex03_EventFilter extends App with EventMarshalling {
   val parse: Flow[String, Event, NotUsed] = Flow[String]
     .map(LogStreamProcessor.parseLineEx)
     .collect { case Some(e) => e }
+    .withAttributes(ActorAttributes.supervisionStrategy(decider))
   val filter: Flow[Event, Event, NotUsed] = Flow[Event]
     .filter(_.state == "error")
   val serialize: Flow[Event, ByteString, NotUsed] = Flow[Event]
@@ -48,7 +62,7 @@ object Ex03_EventFilter extends App with EventMarshalling {
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
-  implicit val materializer = ActorMaterializer()
+  implicit val materializer = ActorMaterializer(ActorMaterializerSettings(system).withSupervisionStrategy(graphDecider))
 
   val runnableGraph: RunnableGraph[Future[IOResult]] = source.via(composedFlow).toMat(sink)(Keep.right)
 

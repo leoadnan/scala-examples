@@ -34,7 +34,7 @@ object Ex00_Test extends App {
   //Flows
   val flowDoublingElements: Flow[Int, Int, NotUsed] = Flow[Int].map(_ * 2)
   val flowFilteringOutOddElements: Flow[Int, Int, NotUsed] = Flow[Int].filter(_ % 2 == 0)
-  val flowBatchingElements: Flow[Int, Seq[Int], NotUsed] = Flow[Int].grouped(10)
+  val flowBatchingElements: Flow[Int, Seq[Int], NotUsed] = Flow[Int].grouped(5)
   val flowBufferingElements = Flow[String].buffer(1000, OverflowStrategy.backpressure) // back-pressures the source if the buffer is full
 
   // Generating graph/blueprint
@@ -52,10 +52,8 @@ object Ex00_Test extends App {
 
   // runs the stream by attaching sink that folds over elements on a stream
   //  Source(List(1, 2, 3)).map(_ * 2).runFold(0)(_ + _).foreach(println)
+  
+  sourceFromRange.via(flowBatchingElements).runForeach(s=>println(s))
 
-  import scala.concurrent.duration._
-  Source(1 to 100).
-    map { x => println(s"passing $x"); x }.
-    buffer(5, OverflowStrategy.dropTail).
-    throttle(1, 1 second, 1, ThrottleMode.shaping).runForeach(println)
+ 
 }
